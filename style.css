@@ -1,0 +1,42 @@
+/* style.css */
+
+/* ページ全体の基本設定 */
+body {
+    font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+    line-height: 1.6;       /* 行間を少し広げて読みやすく */
+    color: #333;            /* 文字色を真っ黒ではなく濃いグレーに */
+    max-width: 800px;       /* 横幅が広がりすぎないように制限 */
+    margin: 0 auto;         /* 画面中央に配置 */
+    padding: 20px;          /* 端に余白を作る */
+    background-color: #f9f9f9; /* 薄いグレーの背景色 */
+}
+
+/* 見出しのデザイン */
+h1 {
+    border-bottom: 2px solid #5a5a5a; /* 下線を入れる */
+    padding-bottom: 10px;
+    font-size: 24px;
+}
+
+h2 {
+    background-color: #fff;
+    padding: 10px;
+    border-left: 5px solid #007acc; /* 左側に青いアクセント */
+    margin-top: 30px;
+}
+
+/* リンクボタンのデザイン（index.html用） */
+a.button-link {
+    display: inline-block;
+    background-color: #007acc;
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none; /* 下線を消す */
+    border-radius: 5px;    /* 角を丸くする */
+    font-weight: bold;
+    margin-top: 20px;
+}
+
+a.button-link:hover {
+    background-color: #005f9e; /* マウスを乗せた時に少し暗く */
+}
