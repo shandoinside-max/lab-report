@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ウルツ鉱構造 結晶面方位可視化</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <style>
+        body { font-family: 'Noto Sans JP', sans-serif; background-color: #f8fafc; padding: 20px; }
+    </style>
+</head>
+<body>
+
+<div id="root"></div>
+
+<script type="text/babel">
+    const { useState, useEffect } = React;
+
+    // Lucide Icon Component (Inline replacement for import)
+    const InfoIcon = ({ className }) => (
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+        </svg>
+    );
+
+    const WurtziteVisualizer = () => {
+        const [activePlane, setActivePlane] = useState('both');
+        const [rotation, setRotation] = useState({ x: -15, y: 45 });
+        const [isDragging, setIsDragging] = useState(false);
+        const [lastMousePos, setLastMousePos] = useState({ x: 0, y: 0 });
+        const [showAxes, setShowAxes] = useState(true);
+
+        // Canvas size
+        const width = 500;
+        const height = 450;
+        const scale = 140;
+
+        // --- Geometry Definitions ---
+        // We use a coordinate system where:
+        // V1 (30 deg) corresponds to a1 axis
+        // V3 (150 deg) corresponds to a2 axis
+        // (Angle between a1 and a2 is 120 deg)
+
+        const generateHexNodes = (z) => {
+            const nodes = [];
+            // Start angles so that V1 is at 30 deg, V3 is at 150 deg.
+            // i=0: -30, i=1: 30(a1), i=2: 90, i=3: 150(a2), i=4: 210, i=5: 270(-a3)
+            for (let i = 0; i < 6; i++) {
+                const angleDeg = i * 60 - 30;
+                const theta = angleDeg * (Math.PI / 180);
+                nodes.push({ 
+                    x: Math.cos(theta), 
+                    y: Math.sin(theta), 
+                    z: z 
+                });
+            }
+            return nodes;
+        };
+
+        const bottomNodes = generateHexNodes(-0.8);
+        const topNodes = generateHexNodes(0.8);
+        
+        // For z=0.5 visual (z goes -0.8 to 0.8, so center is 0)
+        const Z_BOTTOM = -0.8;
+        const Z_TOP = 0.8;
+        const Z_HALF = 0.0;
+
+        // --- Projection Logic ---
+        const project = (point) => {
+            const radY = rotation.y * (Math.PI / 180);
+            const x1 = point.x * Math.cos(radY) - point.y * Math.sin(radY);
+            const z1 = point.x * Math.sin(radY) + point.y * Math.cos(radY);
+            const y1 = point.z;
+
+            const radX = rotation.x * (Math.PI / 180);
+            const y2 = y1 * Math.cos(radX) - z1 * Math.sin(radX);
+            const z2 = y1 * Math.sin(radX) + z1 * Math.cos(radX);
+
+            const perspective = 5;
+            const factor = scale * (perspective / (perspective - z2 / 2));
+
+            return {
+                x: width / 2 + x1 * factor,
+                y: height / 2 - y2 * factor,
+                zDepth: z2 // Store for z-sorting if needed
+            };
+        };
+
+        // --- Exact Crystallographic Planes ---
+
+        // 1. {1 -1 0 1} (M-plane family)
+        const plane_1_101 = [
+            { x: bottomNodes[1].x, y: bottomNodes[1].y, z: Z_BOTTOM }, // a1 tip
+            { x: bottomNodes[0].x, y: bottomNodes[0].y, z: Z_BOTTOM }, // -a2 tip (V0)
+            { x: 0, y: 0, z: Z_TOP } // c tip
+        ];
+
+        // 2. {1 1 -2 2} (A-plane family)
+        const plane_11_22 = [
+            { x: bottomNodes[1].x, y: bottomNodes[1].y, z: Z_BOTTOM }, // a1 tip
+            { x: bottomNodes[3].x, y: bottomNodes[3].y, z: Z_BOTTOM }, // a2 tip
+            { x: 0, y: 0, z: Z_HALF } // c=1/2 tip
+        ];
+
+        // --- Interaction Handlers ---
+        const handleMouseDown = (e) => {
+            setIsDragging(true);
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            setLastMousePos({ x: clientX, y: clientY });
+        };
+
+        const handleMouseMove = (e) => {
+            if (!isDragging) return;
+            // Prevent scrolling on touch devices while rotating
+            if(e.touches) e.preventDefault(); 
+            
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+            const deltaX = clientX - lastMousePos.x;
+            const deltaY = clientY - lastMousePos.y;
+
+            setRotation(prev => ({
+                x: prev.x - deltaY * 0.5,
+                y: prev.y + deltaX * 0.5
+            }));
+            setLastMousePos({ x: clientX, y: clientY });
+        };
+
+        const handleMouseUp = () => setIsDragging(false);
+
+        // --- Drawing Helpers ---
+        const drawLine = (p1, p2, color = "#cbd5e1", width = 1, dashArray = "") => (
+            <line x1={p1.x} y1={p1.y} x2={p2.x} y2={p2.y} stroke={color} strokeWidth={width} strokeDasharray={dashArray} strokeLinecap="round" />
+        );
+
+        const drawText = (p, text, color = "#64748b") => (
+            <text x={p.x} y={p.y} fill={color} fontSize="12" fontWeight="bold" dy="-5">{text}</text>
+        );
+
+        // Projections
+        const projBottom = bottomNodes.map(project);
+        const projTop = topNodes.map(project);
+        const projP1 = plane_1_101.map(project);
+        const projP2 = plane_11_22.map(project);
+        const projCenterBottom = project({ x: 0, y: 0, z: Z_BOTTOM });
+        const projCenterTop = project({ x: 0, y: 0, z: Z_TOP });
+
+        return (
+            <div className="flex flex-col items-center bg-gray-50 p-6 rounded-xl w-full max-w-2xl mx-auto border shadow-sm select-none font-sans">
+                <div className="mb-4 text-center">
+                    <h3 className="text-lg font-bold text-gray-800">ウルツ鉱構造 結晶面方位 (厳密版)</h3>
+                    <p className="text-sm text-gray-500">ドラッグして3D回転 / 結晶軸との交点を確認</p>
+                </div>
+
+                <div 
+                    className="relative cursor-move bg-white rounded-lg shadow-inner border border-gray-200 overflow-hidden touch-none"
+                    style={{ width: width, height: height }}
+                    onMouseDown={handleMouseDown}
+                    onMouseMove={handleMouseMove}
+                    onMouseUp={handleMouseUp}
+                    onMouseLeave={handleMouseUp}
+                    onTouchStart={handleMouseDown}
+                    onTouchMove={handleMouseMove}
+                    onTouchEnd={handleMouseUp}
+                >
+                    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
+                        
+                        {/* 1. Draw Unit Cell Frame (Back) */}
+                        {projBottom.map((node, i) => (
+                            <React.Fragment key={`b-${i}`}>
+                                {/* Bottom Hexagon */}
+                                {drawLine(node, projBottom[(i + 1) % 6], "#e2e8f0", 2)}
+                                {/* Vertical Pillars (Back/All) */}
+                                {drawLine(node, projTop[i], "#f1f5f9", 1)}
+                            </React.Fragment>
+                        ))}
+
+                        {/* 2. Axes (Optional) */}
+                        {showAxes && (
+                            <>
+                                {/* Center to a1 */}
+                                {drawLine(projCenterBottom, projBottom[1], "#94a3b8", 1.5, "4 2")}
+                                {drawText(projBottom[1], "a1", "#475569")}
+
+                                {/* Center to a2 */}
+                                {drawLine(projCenterBottom, projBottom[3], "#94a3b8", 1.5, "4 2")}
+                                {drawText(projBottom[3], "a2", "#475569")}
+
+                                {/* Center to c (up) */}
+                                {drawLine(projCenterBottom, project({ x: 0, y: 0, z: Z_TOP }), "#94a3b8", 1.5, "4 2")}
+                            </>
+                        )}
+
+                        {/* 3. Planes */}
+                        
+                        {/* Plane 11-22 (Red) */}
+                        {(activePlane === '11-22' || activePlane === 'both') && (
+                            <g>
+                                <polygon 
+                                    points={projP2.map(p => `${p.x},${p.y}`).join(' ')}
+                                    fill="rgba(239, 68, 68, 0.4)"
+                                    stroke="#dc2626"
+                                    strokeWidth="2"
+                                />
+                                {/* Intercept point indicator */}
+                                <circle cx={project({ x: 0, y: 0, z: Z_HALF }).x} cy={project({ x: 0, y: 0, z: Z_HALF }).y} r="3" fill="#dc2626" />
+                            </g>
+                        )}
+
+                        {/* Plane 1-101 (Blue) */}
+                        {(activePlane === '1-101' || activePlane === 'both') && (
+                            <g>
+                                <polygon 
+                                    points={projP1.map(p => `${p.x},${p.y}`).join(' ')}
+                                    fill="rgba(59, 130, 246, 0.4)"
+                                    stroke="#2563eb"
+                                    strokeWidth="2"
+                                />
+                                {/* Intercept point indicator */}
+                                <circle cx={project({ x: 0, y: 0, z: Z_TOP }).x} cy={project({ x: 0, y: 0, z: Z_TOP }).y} r="3" fill="#2563eb" />
+                            </g>
+                        )}
+
+                        {/* 4. Draw Unit Cell Frame (Top) */}
+                        {projTop.map((node, i) => (
+                            <React.Fragment key={`t-${i}`}>
+                                {drawLine(node, projTop[(i + 1) % 6], "#cbd5e1", 2)}
+                            </React.Fragment>
+                        ))}
+
+                        {/* Orientation widget */}
+                        <g transform="translate(30, 420)">
+                            <text className="text-xs fill-gray-400">Rot X: {Math.round(rotation.x)}°</text>
+                            <text y="15" className="text-xs fill-gray-400">Rot Y: {Math.round(rotation.y)}°</text>
+                        </g>
+                    </svg>
+
+                    {/* Legend Overlay */}
+                    <div className="absolute top-4 right-4 flex flex-col gap-3 bg-white/90 p-3 rounded-lg border border-gray-100 shadow-sm">
+                        <div className="flex flex-col gap-1">
+                            <div className="flex items-center gap-2">
+                                <div className="w-3 h-3 bg-blue-500 rounded-sm"></div>
+                                <span className="text-sm font-bold text-gray-700">{`{1-101}`}</span>
+                            </div>
+                            <span className="text-xs text-gray-500 ml-5">切片: a1, -a2, c=1</span>
+                            <span className="text-xs text-blue-600 ml-5">M面 (側面) 方向</span>
+                        </div>
+
+                        <div className="w-full h-px bg-gray-200"></div>
+
+                        <div className="flex flex-col gap-1">
+                            <div className="flex items-center gap-2">
+                                <div className="w-3 h-3 bg-red-500 rounded-sm"></div>
+                                <span className="text-sm font-bold text-gray-700">{`{11-22}`}</span>
+                            </div>
+                            <span className="text-xs text-gray-500 ml-5">切片: a1, a2, c=1/2</span>
+                            <span className="text-xs text-red-600 ml-5">A面 (角) 方向</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="flex gap-4 mt-6">
+                    <div className="flex bg-gray-100 p-1 rounded-lg">
+                        <button 
+                            onClick={() => setActivePlane('1-101')}
+                            className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${activePlane === '1-101' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                        >
+                            {`{1-101}`}
+                        </button>
+                        <button 
+                            onClick={() => setActivePlane('11-22')}
+                            className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${activePlane === '11-22' ? 'bg-white text-red-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                        >
+                            {`{11-22}`}
+                        </button>
+                        <button 
+                            onClick={() => setActivePlane('both')}
+                            className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${activePlane === 'both' ? 'bg-white text-gray-800 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+                        >
+                            両方
+                        </button>
+                    </div>
+
+                    <button 
+                        onClick={() => setShowAxes(!showAxes)}
+                        className="px-4 py-2 rounded-lg border border-gray-300 text-gray-600 text-sm hover:bg-gray-50"
+                    >
+                        {showAxes ? '軸を隠す' : '軸を表示'}
+                    </button>
+                </div>
+
+                <div className="mt-4 p-4 bg-yellow-50 text-yellow-900 rounded-lg text-sm w-full border border-yellow-100">
+                    <div className="flex items-start gap-2">
+                        <InfoIcon className="w-5 h-5 mt-0.5 flex-shrink-0 text-yellow-600" />
+                        <div>
+                            <strong>訂正・確認ポイント：</strong>
+                            <ul className="list-disc ml-4 mt-1 space-y-1 text-yellow-800">
+                                <li>
+                                    <b>{`{1-101}`} (青)</b>: a1 と -a2 (隣り合う頂点) を結び、頂点 c=1
+                                    に至ります。これは六角形の<b>「辺（M面方位）」</b>の上に立ち上がるピラミッド面です。
+                                </li>
+                                <li>
+                                    <b>{`{11-22}`} (赤)</b>: a1 と a2 (1つ飛ばした頂点) を結び、高さ <b>c=1/2</b> で交差します。指数 l=2 は
+                                    c 軸との交点が 1/2 であることを示します。これは<b>「角（A面方位）」</b>を大きく切り取る面になります。
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<WurtziteVisualizer />);
+</script>
+
+</body>
+</html>
