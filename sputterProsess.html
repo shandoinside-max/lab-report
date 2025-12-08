@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AlN結晶成長プロセス図解</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <style>
+        body { font-family: 'Noto Sans JP', sans-serif; background-color: #f8fafc; padding: 20px; }
+    </style>
+</head>
+<body>
+
+<div id="root"></div>
+
+<script type="text/babel">
+    const { useState, useEffect } = React;
+
+    // --- Icon Components (Inline replacement for lucide-react) ---
+    const Play = ({ size = 24, className = "" }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+        </svg>
+    );
+    const Pause = ({ size = 24, className = "" }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+            <rect x="6" y="4" width="4" height="16"></rect>
+            <rect x="14" y="4" width="4" height="16"></rect>
+        </svg>
+    );
+    const RefreshCw = ({ size = 24, className = "" }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+            <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+            <path d="M3 3v5h5"></path>
+            <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"></path>
+            <path d="M16 21h5v-5"></path>
+        </svg>
+    );
+    const Zap = ({ size = 24, className = "" }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+        </svg>
+    );
+    const Thermometer = ({ size = 24, className = "" }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+            <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"></path>
+        </svg>
+    );
+    const ArrowUp = ({ size = 24, className = "" }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+            <line x1="12" y1="19" x2="12" y2="5"></line>
+            <polyline points="5 12 12 5 19 12"></polyline>
+        </svg>
+    );
+    const ArrowDown = ({ size = 24, className = "" }) => (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <polyline points="19 12 12 19 5 12"></polyline>
+        </svg>
+    );
+
+    // --- Main Component ---
+    const AlNProcessDiagram = () => {
+        const [activeTab, setActiveTab] = useState('sputter');
+        const [isPlaying, setIsPlaying] = useState(true);
+        const [time, setTime] = useState(0);
+
+        useEffect(() => {
+            let interval;
+            if (isPlaying) {
+                interval = setInterval(() => {
+                    setTime((prev) => (prev + 1) % 1000);
+                }, 50);
+            }
+            return () => clearInterval(interval);
+        }, [isPlaying]);
+
+        const resetAnimation = () => {
+            setTime(0);
+            setIsPlaying(true);
+        };
+
+        return (
+            <div className="w-full max-w-4xl mx-auto p-4 bg-slate-50 rounded-xl shadow-lg font-sans">
+                {/* Header & Tabs */}
+                <div className="mb-6">
+                    <h2 className="text-2xl font-bold text-slate-800 mb-2">AlN結晶成長プロセス図解</h2>
+                    <p className="text-sm text-slate-600 mb-4">
+                        スパッタ成膜とFace-to-Faceアニールにおける原子・粒子の挙動
+                    </p>
+
+                    <div className="flex space-x-2 bg-slate-200 p-1 rounded-lg inline-flex">
+                        <button onClick={()=> { setActiveTab('sputter'); resetAnimation(); }}
+                            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                            activeTab === 'sputter'
+                            ? 'bg-white text-blue-600 shadow-sm'
+                            : 'text-slate-600 hover:text-slate-800'
+                            }`}
+                            >
+                            1. RFスパッタ法 (成膜)
+                        </button>
+                        <button onClick={()=> { setActiveTab('anneal'); resetAnimation(); }}
+                            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                            activeTab === 'anneal'
+                            ? 'bg-white text-orange-600 shadow-sm'
+                            : 'text-slate-600 hover:text-slate-800'
+                            }`}
+                            >
+                            2. Face-to-Faceアニール (結晶化)
+                        </button>
+                    </div>
+                </div>
+
+                {/* Main Visualization Area */}
+                <div className="relative w-full aspect-[16/9] bg-slate-900 rounded-xl overflow-hidden shadow-inner border border-slate-700">
+
+                    {/* Playback Controls */}
+                    <div className="absolute top-4 right-4 z-20 flex gap-2">
+                        <button onClick={()=> setIsPlaying(!isPlaying)}
+                            className="p-2 bg-slate-800/80 hover:bg-slate-700 text-white rounded-full transition-colors"
+                            >
+                            {isPlaying ? <Pause size={16} /> : <Play size={16} />}
+                        </button>
+                        <button onClick={resetAnimation}
+                            className="p-2 bg-slate-800/80 hover:bg-slate-700 text-white rounded-full transition-colors">
+                            <RefreshCw size={16} />
+                        </button>
+                    </div>
+
+                    {activeTab === 'sputter' ? (
+                        <SputteringView time={time} />
+                    ) : (
+                        <AnnealingView time={time} />
+                    )}
+
+                </div>
+
+                {/* Caption / Legend Area */}
+                <div className="mt-4 p-4 bg-white rounded-lg border border-slate-200">
+                    <h3 className="font-bold text-slate-700 mb-2 flex items-center gap-2">
+                        {activeTab === 'sputter' ?
+                        <Zap size={18} className="text-blue-500" /> :
+                        <Thermometer size={18} className="text-orange-500" />}
+                        {activeTab === 'sputter' ? '図解のポイント: RFスパッタリング' : '図解のポイント: Face-to-Faceアニール'}
+                    </h3>
+
+                    {activeTab === 'sputter' ? (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-slate-600">
+                            <div>
+                                <p className="mb-1"><span className="font-bold text-blue-600">● ターゲット (下):</span>
+                                    AlN多結晶。絶縁体のためRF(高周波)印加が必要。</p>
+                                <p className="mb-1"><span className="font-bold text-yellow-500">● マグネトロン (螺旋):</span>
+                                    磁場で電子(e⁻)を閉じ込め、Arガスとの衝突確率を上げて高密度プラズマを生成。</p>
+                            </div>
+                            <div>
+                                <p className="mb-1"><span className="font-bold text-red-500">● Arイオン (赤):</span> プラズマ中で加速され、ターゲットを叩く。
+                                </p>
+                                <p className="mb-1"><span className="font-bold text-cyan-500">● スパッタ粒子 (青/緑):</span>
+                                    弾き飛ばされたAl/Nが基板へ。表面マイグレーションが弱く、<span className="font-bold">柱状構造</span>になる。</p>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-slate-600">
+                            <div>
+                                <p className="mb-1"><span className="font-bold text-orange-600">● Face-to-Face配置:</span>
+                                    2枚の基板のAlN面同士を密着させ、分解ガス(N, Al)を隙間に閉じ込める。</p>
+                                <p className="mb-1"><span className="font-bold text-red-500">● 蒸気圧抑制:</span> 隙間が飽和状態になり、それ以上の分解(昇華)が止まる。
+                                </p>
+                            </div>
+                            <div>
+                                <p className="mb-1"><span className="font-bold text-purple-600">● 結晶融合:</span>
+                                    1600℃以上の熱で柱状結晶が動き、融合(Coalescence)して大きな単結晶へ変化。</p>
+                                <p className="mb-1"><span className="font-bold text-slate-800">● 結果:</span> 転位密度が大幅に低減する。</p>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+        );
+    };
+
+    // --- Sub-Components for Sputtering View ---
+
+    const SputteringView = ({ time }) => {
+        // Generate random particles based on time
+        const generateParticles = (count, type) => {
+            return Array.from({ length: count }).map((_, i) => {
+                // Create a predictable pseudo-random movement based on time
+                const seed = i * 137;
+                const cycle = (time + seed) % 100;
+                const progress = cycle / 100;
+                return { id: i, progress, seed };
+            });
+        };
+
+        const electrons = generateParticles(12, 'electron');
+        const arIons = generateParticles(8, 'arIon');
+        const sputteredAtoms = generateParticles(15, 'sputtered');
+
+        // Film growth simulation
+        const filmHeight = Math.min(40, time / 5);
+
+        return (
+            <div className="relative w-full h-full bg-slate-900 select-none">
+                {/* Background Vacuum Chamber Text */}
+                <div className="absolute top-4 left-4 text-slate-600 font-mono text-xs">
+                    VACUUM CHAMBER (Ar + N₂ Atmosphere)
+                </div>
+
+                {/* --- Top: Substrate Holder --- */}
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-12 bg-slate-400 rounded-b-lg flex flex-col items-center shadow-lg z-10">
+                    <span className="text-xs text-slate-800 font-bold mt-1">基板ホルダー (Heater)</span>
+                    <div className="w-full h-1 bg-red-400/50 blur-[2px] mt-1"></div>
+                </div>
+
+                {/* Substrate (Sapphire) */}
+                <div className="absolute top-12 left-1/2 -translate-x-1/2 w-48 h-4 bg-cyan-100/90 border border-cyan-300 z-10 flex items-center justify-center">
+                    <span className="text-[10px] text-cyan-900 font-bold">サファイア基板</span>
+                </div>
+
+                {/* Growing AlN Film (Columnar Structure) */}
+                <div className="absolute top-16 left-1/2 -translate-x-1/2 w-48 z-10 flex items-start justify-center overflow-hidden" style={{ height: '50px' }}>
+                    <div className="flex w-full h-full items-start justify-center gap-[1px] opacity-90">
+                        {Array.from({ length: 20 }).map((_, i) => (
+                            <div key={i} className="w-2 bg-gradient-to-b from-blue-300 to-blue-500 rounded-b-sm" 
+                                style={{ height: `${Math.min(filmHeight, filmHeight * (0.8 + Math.random() * 0.4))}px`, transition: 'height 0.1s linear' }} />
+                        ))}
+                    </div>
+                </div>
+
+                {/* --- Bottom: Target Assembly --- */}
+                <div className="absolute bottom-10 left-1/2 -translate-x-1/2 w-64 flex flex-col items-center z-10">
+                    {/* Plasma Glow */}
+                    <div className="absolute bottom-full w-80 h-40 bg-purple-500/20 blur-[40px] rounded-full pointer-events-none animate-pulse">
+                    </div>
+
+                    {/* Target Material */}
+                    <div className="w-48 h-6 bg-slate-300 border-2 border-slate-400 relative overflow-hidden flex items-center justify-center">
+                        <span className="text-xs text-slate-800 font-bold z-10 relative">AlN多結晶ターゲット</span>
+                        {/* Erosion area */}
+                        <div className="absolute top-0 w-32 h-2 bg-slate-400/50 rounded-b-full blur-[1px]"></div>
+                    </div>
+
+                    {/* Backing Plate */}
+                    <div className="w-56 h-4 bg-orange-700/80 rounded-b-sm"></div>
+
+                    {/* Magnets */}
+                    <div className="flex gap-4 mt-1">
+                        <div className="w-12 h-6 bg-slate-700 rounded-sm flex items-center justify-center text-[10px] text-white">N</div>
+                        <div className="w-12 h-6 bg-slate-700 rounded-sm flex items-center justify-center text-[10px] text-white">S</div>
+                        <div className="w-12 h-6 bg-slate-700 rounded-sm flex items-center justify-center text-[10px] text-white">N</div>
+                    </div>
+
+                    {/* RF Power Source */}
+                    <div className="absolute -right-32 bottom-0 flex flex-col items-center">
+                        <div className="w-16 h-2 bg-yellow-500 mx-auto animate-pulse" />
+                        <div className="w-20 h-12 bg-slate-800 border border-slate-600 rounded flex items-center justify-center text-yellow-400 font-mono text-xs shadow-[0_0_10px_rgba(234,179,8,0.5)]">
+                            RF 13.56MHz
+                        </div>
+                    </div>
+                </div>
+
+                {/* --- Particles Animation Layer --- */}
+                <svg className="absolute inset-0 w-full h-full pointer-events-none overflow-visible">
+                    <defs>
+                        <filter id="glow">
+                            <feGaussianBlur stdDeviation="2" result="coloredBlur" />
+                            <feMerge>
+                                <feMergeNode in="coloredBlur" />
+                                <feMergeNode in="SourceGraphic" />
+                            </feMerge>
+                        </filter>
+                    </defs>
+
+                    {/* 1. Electrons (Spiraling near target) */}
+                    {electrons.map((p) => {
+                        // Cyclotron motion simulation
+                        const angle = p.progress * Math.PI * 8; // Spiral
+                        const radius = 30 + Math.sin(p.progress * Math.PI * 2) * 10;
+                        const x = 50 + (radius * Math.cos(angle)) / 6; // Normalize to center %
+                        const y = 80 - (p.progress * 5 + Math.sin(angle) * 2); // Height %
+
+                        return (
+                            <circle key={`e-${p.id}`} cx={`${x}%`} cy={`${y}%`} r="2" fill="#fbbf24" className="opacity-80" />
+                        );
+                    })}
+
+                    {/* 2. Ar Ions (Accelerating Down) */}
+                    {arIons.map((p) => {
+                        // Start from random plasma area, hit target
+                        const startX = 40 + (p.seed % 20);
+                        const startY = 60;
+                        const endX = startX + (Math.random() - 0.5) * 5;
+                        const endY = 82; // Target surface
+
+                        const currentX = startX + (endX - startX) * p.progress;
+                        const currentY = startY + (endY - startY) * p.progress;
+
+                        if (p.progress > 0.95) return null; // Disappear on impact
+
+                        // Note: Using group for potential transform, but basic circles here
+                        return null; 
+                    })}
+
+                    {/* Simplified Particle Mapping for SVG using percentage directly */}
+                    {arIons.map((p) => {
+                        if (p.progress > 0.9) return null;
+                        const x = 40 + (p.seed % 20);
+                        const y = 65 + p.progress * 18; // Fall to ~83%
+                        return (
+                            <circle key={`ar-${p.id}`} cx={`${x}%`} cy={`${y}%`} r="4" fill="#ef4444" />
+                        );
+                    })}
+
+                    {/* 3. Sputtered Atoms (Flying Up) */}
+                    {sputteredAtoms.map((p) => {
+                        // Start from target, fly to substrate
+                        const startX = 40 + (p.seed % 20);
+                        const startY = 82;
+                        const targetX = 40 + (p.seed * 7 % 20); // Random spot on substrate
+                        const targetY = 20; // Substrate surface
+
+                        const currentX = startX + (targetX - startX) * p.progress;
+                        const currentY = startY + (targetY - startY) * p.progress;
+
+                        if (p.progress < 0.1) return null; // Delay appearance
+                        
+                        const color = p.id % 2 === 0 ? '#3b82f6' : '#22c55e'; // Al (Blue) or N (Green)
+                        
+                        return (
+                            <circle key={`sp-${p.id}`} cx={`${currentX}%`} cy={`${currentY}%`} r="3" fill={color} />
+                        );
+                    })}
+
+                </svg>
+
+                {/* Legend inside canvas */}
+                <div className="absolute bottom-4 left-4 bg-slate-800/80 p-2 rounded text-[10px] text-white">
+                    <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-red-500"></div> Ar⁺ Ion
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-yellow-400"></div> e⁻ Electron
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-blue-500"></div> Al Atom
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-green-500"></div> N Atom
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    // --- Sub-Components for Annealing View ---
+
+    const AnnealingView = ({ time }) => {
+        // Annealing progress (0 to 1) based on time loop or scroll
+        // Let's make it loop slowly: 0 -> 1 over full time
+        const progress = Math.min(1, time / 800);
+
+        // Color temperature shift: Red -> Orange -> White-ish hot
+        const heatColor = progress < 0.2 ? 'bg-red-900' : progress < 0.5 ? 'bg-orange-800' : 'bg-orange-600';
+        const glowOpacity = 0.2 + progress * 0.4;
+        
+        return (
+            <div className={`relative w-full h-full ${heatColor} transition-colors duration-1000 overflow-hidden`}>
+                {/* Background Heat Glow */}
+                <div className="absolute inset-0 bg-orange-500 mix-blend-screen" style={{ opacity: glowOpacity }}></div>
+
+                <div className="absolute top-4 left-4 text-white/70 font-mono text-xs z-20">
+                    ATMOSPHERE: N₂ (1 atm) <br />
+                    TEMP: {1000 + Math.floor(progress * 700)}°C
+                </div>
+
+                {/* --- Center: Face-to-Face Samples --- */}
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 z-10">
+
+                    {/* Top Sample (Sapphire on top, AlN below) */}
+                    <div className="flex flex-col items-center">
+                        <div className="w-64 h-6 bg-cyan-100/90 border border-cyan-300 flex items-center justify-center text-[10px] text-cyan-900 font-bold">
+                            サファイア基板 (Top)
+                        </div>
+
+                        {/* Top AlN Layer (Transforming) */}
+                        <div className="w-64 h-8 bg-blue-400 border-x border-blue-500 relative overflow-hidden">
+                            {/* Columnar Lines fading out */}
+                            <div className="absolute inset-0 flex" style={{ opacity: 1 - progress }}>
+                                {Array.from({ length: 30 }).map((_, i) => (
+                                    <div key={i} className="flex-1 border-r border-slate-700/30"></div>
+                                ))}
+                            </div>
+                            {/* Crystal Quality Text */}
+                            <div className="absolute inset-0 flex items-center justify-center text-[10px] text-white font-bold mix-blend-overlay">
+                                AlN膜 (↓ 下向き)
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Interface Gap (Exaggerated for visibility) */}
+                    <div className="relative w-64 h-4 my-[1px] mx-auto flex items-center justify-center">
+                        {/* Confined Vapors Animation */}
+                        {progress > 0.2 && (
+                            <div className="absolute inset-0 overflow-hidden">
+                                {Array.from({ length: 10 }).map((_, i) => (
+                                    <div key={i} className="absolute w-1 h-1 rounded-full bg-white animate-ping" 
+                                        style={{ 
+                                            left: `${Math.random() * 100}%`, 
+                                            top: '50%', 
+                                            animationDuration: `${0.5 + Math.random()}s`,
+                                            animationDelay: `${Math.random()}s` 
+                                        }} />
+                                ))}
+                            </div>
+                        )}
+                        <div className="text-[9px] text-yellow-200 font-bold tracking-widest bg-black/20 px-2 rounded backdrop-blur-sm z-20">
+                            Face-to-Face Interface
+                        </div>
+
+                        {/* Decomposition Suppression Arrows */}
+                        {progress > 0.3 && (
+                            <>
+                                <div className="absolute left-10 text-white animate-bounce opacity-50"><ArrowUp size={12} /></div>
+                                <div className="absolute left-12 text-white animate-bounce opacity-50"><ArrowDown size={12} /></div>
+                                <div className="absolute right-10 text-white animate-bounce opacity-50"><ArrowUp size={12} /></div>
+                                <div className="absolute right-12 text-white animate-bounce opacity-50"><ArrowDown size={12} /></div>
+                            </>
+                        )}
+                    </div>
+
+                    {/* Bottom Sample (AlN on top, Sapphire below) */}
+                    <div className="flex flex-col items-center">
+                        {/* Bottom AlN Layer (Transforming) */}
+                        <div className="w-64 h-8 bg-blue-400 border-x border-blue-500 relative overflow-hidden transition-all duration-1000"
+                            style={{ backgroundColor: progress > 0.8 ? '#60a5fa' : '#3b82f6' }}>
+
+                            {/* Columnar Structure (Initial State) */}
+                            <div className="absolute inset-0 flex" style={{ opacity: Math.max(0, 1 - progress * 1.5) }}>
+                                {Array.from({ length: 30 }).map((_, i) => (
+                                    <div key={i} className="flex-1 border-r border-slate-800/40 bg-blue-500"></div>
+                                ))}
+                            </div>
+
+                            {/* Coalesced Structure (Final State) */}
+                            <div className="absolute inset-0 flex" style={{ opacity: Math.min(1, (progress - 0.4) * 2) }}>
+                                {/* Fewer, wider grains */}
+                                {Array.from({ length: 4 }).map((_, i) => (
+                                    <div key={i} className="flex-1 border-r border-white/30 bg-blue-400 flex items-center justify-center">
+                                        <span className="text-[8px] text-white/50">Single Crystal</span>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="absolute inset-0 flex items-center justify-center text-[10px] text-white font-bold mix-blend-overlay">
+                                AlN膜 (↑ 上向き)
+                            </div>
+                        </div>
+
+                        <div className="w-64 h-6 bg-cyan-100/90 border border-cyan-300 flex items-center justify-center text-[10px] text-cyan-900 font-bold">
+                            サファイア基板 (Bottom)
+                        </div>
+                    </div>
+
+                </div>
+
+                {/* Heater Coils (Top and Bottom) */}
+                <div className="absolute top-4 left-1/2 -translate-x-1/2 w-96 h-2 bg-gradient-to-r from-transparent via-orange-500 to-transparent blur-md">
+                </div>
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-96 h-2 bg-gradient-to-r from-transparent via-orange-500 to-transparent blur-md">
+                </div>
+
+                {/* Explanation Overlay based on progress */}
+                <div className="absolute bottom-8 w-full text-center px-4">
+                    <div className="inline-block bg-black/40 text-white text-sm px-4 py-2 rounded-full backdrop-blur-md transition-all">
+                        {progress < 0.3 && "1. 昇温: AlN柱状構造はまだ欠陥が多い" }
+                        {progress >= 0.3 && progress < 0.7 && "2. 高温保持: 界面蒸気圧で分解を抑制しつつ、原子が移動" }
+                        {progress >= 0.7 && "3. 再結晶化: 柱状晶が融合し、欠陥(粒界)が消失"}
+                    </div>
+                </div>
+
+            </div>
+        );
+    };
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<AlNProcessDiagram />);
+</script>
+
+</body>
+</html>
