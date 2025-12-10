@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="ja">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -46,7 +45,7 @@
         .card {
             background-color: var(--card-bg);
             border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
             padding: 30px;
             margin-bottom: 30px;
         }
@@ -78,7 +77,7 @@
 
         .svg-container {
             width: 100%;
-            height: 250px;
+            height: 300px; /* 高さを少し確保 */
             margin-bottom: 15px;
             background-color: #f0f4f8;
             border-radius: 4px;
@@ -101,68 +100,24 @@
             color: var(--accent-color);
         }
 
-        /* SVG Animation Styles */
-        .crystal-center {
-            fill: #333;
-        }
-
+        /* SVG Styles */
+        text { font-family: sans-serif; font-weight: bold; }
+        
         /* Convex Styles */
-        .face-slow {
-            stroke: #2980b9;
-            stroke-width: 3;
-            stroke-linecap: round;
-        }
-
-        .face-fast {
-            stroke: #e74c3c;
-            stroke-width: 3;
-            stroke-linecap: round;
-            stroke-dasharray: 5, 3;
-        }
-
-        .arrow-slow {
-            stroke: #2980b9;
-            fill: #2980b9;
-            stroke-width: 1;
-        }
-
-        .arrow-fast {
-            stroke: #e74c3c;
-            fill: #e74c3c;
-            stroke-width: 1;
-        }
-
-        .shape-convex {
-            fill: rgba(52, 152, 219, 0.2);
-            stroke: #2980b9;
-            stroke-width: 2;
-        }
-
+        .convex-initial { fill: none; stroke: #999; stroke-width: 2; stroke-dasharray: 4; }
+        .convex-final { fill: rgba(52, 152, 219, 0.2); stroke: #2980b9; stroke-width: 3; }
+        
         /* Concave Styles */
-        .hole-bg {
-            fill: #e0e0e0;
-        }
+        .concave-bg { fill: #ddd; }
+        .concave-hole-initial { fill: #fff; stroke: #999; stroke-width: 2; stroke-dasharray: 4; }
+        .concave-hole-final { fill: #fff; stroke: #e74c3c; stroke-width: 3; }
+        
+        /* Arrows */
+        .arrow-slow { stroke: #2980b9; stroke-width: 2; marker-end: url(#arrowBlue); }
+        .arrow-fast { stroke: #e74c3c; stroke-width: 2; marker-end: url(#arrowRed); }
 
-        .hole-void {
-            fill: #ffffff;
-            stroke: #333;
-            stroke-width: 1;
-            stroke-dasharray: 4;
-        }
-
-        .growth-layer-slow {
-            fill: rgba(41, 128, 185, 0.3);
-        }
-
-        .growth-layer-fast {
-            fill: rgba(231, 76, 60, 0.3);
-        }
-
-        .final-shape-concave {
-            fill: #fff;
-            stroke: #e74c3c;
-            stroke-width: 3;
-        }
+        .label-slow { fill: #2980b9; font-size: 14px; }
+        .label-fast { fill: #e74c3c; font-size: 14px; }
 
         .note-box {
             background-color: #fff8e1;
@@ -171,137 +126,145 @@
             margin-top: 20px;
             font-size: 0.9em;
         }
+
     </style>
 </head>
-
 <body>
 
-    <div class="container">
-        <h1>ウルフの成長理論：なぜ「穴」は「速い面」になるのか？</h1>
+<div class="container">
+    <h1>ウルフの成長理論：なぜ「穴」は「速い面」になるのか？</h1>
 
-        <div class="card">
-            <p>
-                結晶が成長して最終的にどのような「形（ファセット）」になるかは、各面の<strong>成長速度の違い</strong>によって決まります。<br>
-                直感的には「速く成長する面が大きくなりそう」ですが、実は<strong>「外に向かうか（凸）」、「内側を埋めるか（凹）」</strong>によって、残る面は正反対になります。
-            </p>
-        </div>
-
-        <div class="comparison-container">
-            <!-- 凸型成長 -->
-            <div class="comparison-box">
-                <span class="box-title">ケースA：凸型成長 (Convex)<br><small>（通常の結晶成長）</small></span>
-
-                <svg class="svg-container" viewBox="0 0 300 250">
-                    <!-- Center -->
-                    <circle cx="150" cy="125" r="3" class="crystal-center" />
-
-                    <!-- Slow Growth (Vertical) -->
-                    <line x1="150" y1="125" x2="150" y2="80" class="arrow-slow" marker-end="url(#arrowBlue)" />
-                    <line x1="150" y1="125" x2="150" y2="170" class="arrow-slow" marker-end="url(#arrowBlue)" />
-                    <text x="160" y="90" font-size="12" fill="#2980b9">遅い (Slow)</text>
-
-                    <!-- Fast Growth (Horizontal) -->
-                    <line x1="150" y1="125" x2="210" y2="125" class="arrow-fast" marker-end="url(#arrowRed)" />
-                    <line x1="150" y1="125" x2="90" y2="125" class="arrow-fast" marker-end="url(#arrowRed)" />
-                    <text x="180" y="115" font-size="12" fill="#e74c3c">速い (Fast)</text>
-
-                    <!-- Resulting Shape (Diamond to Rectangle) -->
-                    <!-- The fast faces move far away, the slow faces stay close -->
-                    <polygon points="100,75 200,75 200,175 100,175" class="shape-convex" />
-
-                    <!-- Initial small shape showing fast faces disappearing -->
-                    <path d="M130,105 L170,105 L170,145 L130,145 Z" fill="none" stroke="#ccc" stroke-dasharray="2" />
-
-                    <defs>
-                        <marker id="arrowBlue" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
-                            <path d="M0,0 L0,6 L9,3 z" fill="#2980b9" />
-                        </marker>
-                        <marker id="arrowRed" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
-                            <path d="M0,0 L0,6 L9,3 z" fill="#e74c3c" />
-                        </marker>
-                    </defs>
-                </svg>
-
-                <div class="explanation">
-                    <p>種結晶が外へ広がる場合：</p>
-                    <ul>
-                        <li><span class="keyword-accent">速い面（赤）</span>：中心からどんどん遠ざかり、やがて消滅するか、面積が小さくなります。</li>
-                        <li><span class="keyword">遅い面（青）</span>：中心の近くに留まり、最終的な表面として残ります。</li>
-                    </ul>
-                    <p><strong>結論：<span class="keyword">「遅い面」</span>が形を支配する。</strong></p>
-                </div>
-            </div>
-
-            <!-- 凹型成長 -->
-            <div class="comparison-box">
-                <span class="box-title">ケースB：凹型成長 (Concave)<br><small>（穴埋め・会合）</small></span>
-
-                <svg class="svg-container" viewBox="0 0 300 250">
-                    <!-- Background is material -->
-                    <rect x="0" y="0" width="300" height="250" class="hole-bg" />
-
-                    <!-- The Hole (Void) -->
-                    <circle cx="150" cy="125" r="80" class="hole-void" />
-
-                    <!-- Growth Vectors (Pointing Inward) -->
-                    <!-- Slow Face Growing In -->
-                    <line x1="150" y1="45" x2="150" y2="85" class="arrow-slow" marker-end="url(#arrowBlue)" />
-                    <text x="160" y="60" font-size="12" fill="#2980b9">遅い</text>
-
-                    <!-- Fast Face Growing In -->
-                    <line x1="230" y1="125" x2="190" y2="125" class="arrow-fast" marker-end="url(#arrowRed)" />
-                    <text x="210" y="115" font-size="12" fill="#e74c3c">速い</text>
-
-                    <!-- Visualization of Fast Faces dominating -->
-                    <!-- A shape bounded by fast planes penetrating deep into the hole -->
-                    <!-- Imagine a hexagon hole turning into a triangle -->
-
-                    <!-- Fast planes (Red) cut deep -->
-                    <polygon points="150,125 300,30 300,220" fill="rgba(231,76,60,0.5)" />
-                    <polygon points="150,125 0,30 0,220" fill="rgba(231,76,60,0.5)" />
-                    <polygon points="150,125 150,250 150,250" /> <!-- Just schematic -->
-
-                    <!-- Simplified Triangle Shape representing the hole -->
-                    <polygon points="70,100 230,100 150,230" class="final-shape-concave" />
-
-                    <text x="150" y="180" text-anchor="middle" font-size="14" fill="#e74c3c"
-                        font-weight="bold">速い面が<br>穴の壁になる</text>
-
-                </svg>
-
-                <div class="explanation">
-                    <p>穴が内側へ埋まる場合：</p>
-                    <ul>
-                        <li><span class="keyword">遅い面（青）</span>：なかなか進まないため、他の面に追い越されて埋もれてしまいます。</li>
-                        <li><span class="keyword-accent">速い面（赤）</span>：猛スピードで穴の中心へ突き出していきます。一番「出っ張った」部分が、穴の輪郭（壁）となります。
-                        </li>
-                    </ul>
-                    <p><strong>結論：<span class="keyword-accent">「速い面」</span>が形を支配する。</strong></p>
-                </div>
-            </div>
-        </div>
-
-        <div class="card">
-            <h2>論文の解釈（なぜ三角形の穴なのか？）</h2>
-            <p>
-                論文中の図3(b)で、AlNの穴が<strong>三角形</strong>になっていることが確認されました。<br>
-                この穴の壁面は <strong>{11-2x} ファセット</strong> です。
-            </p>
-            <div class="note-box">
-                <strong>ロジックの整理：</strong>
-                <ol>
-                    <li>穴埋め成長（凹型）では、「成長速度が最も速い面」が穴の壁として現れる（ウルフの理論）。</li>
-                    <li>実験の結果、穴の壁として {11-2x} 面が現れた。</li>
-                    <li>したがって、この成長条件（1550℃ HVPE）では、<strong>{11-2x} 面が最も成長速度が速い面である</strong>と言える。</li>
-                </ol>
-            </div>
-            <p>
-                著者は、この理論を引用することで、「なぜこのような形状の穴が残ったのか」を理論的に裏付け、同時に「この条件では {11-2x} 方向への埋め込み成長が非常に活発である」ことを示唆しています。
-            </p>
-        </div>
-
+    <div class="card">
+        <p>
+            結晶が成長して最終的にどのような「形（ファセット）」になるかは、各面の<strong>成長速度の違い</strong>によって決まります。<br>
+            直感的には「速く成長する面が大きくなりそう」ですが、実は<strong>「外に向かうか（凸）」、「内側を埋めるか（凹）」</strong>によって、残る面は正反対になります。
+        </p>
     </div>
 
-</body>
+    <div class="comparison-container">
+        <!-- 凸型成長 -->
+        <div class="comparison-box">
+            <span class="box-title">ケースA：凸型成長 (Convex)<br><small>（通常の結晶成長）</small></span>
+            
+            <svg class="svg-container" viewBox="0 0 300 300">
+                <defs>
+                    <marker id="arrowBlue" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                        <path d="M0,0 L0,6 L9,3 z" fill="#2980b9" />
+                    </marker>
+                    <marker id="arrowRed" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                        <path d="M0,0 L0,6 L9,3 z" fill="#e74c3c" />
+                    </marker>
+                </defs>
 
+                <!-- Center -->
+                <circle cx="150" cy="150" r="4" fill="#333" />
+
+                <!-- 1. Initial Shape (Dashed Square) -->
+                <rect x="120" y="120" width="60" height="60" class="convex-initial" />
+                <text x="125" y="115" fill="#999" font-size="12">初期形状</text>
+
+                <!-- 2. Growth Vectors (Outward) -->
+                <!-- Slow (Vertical) - Grows little distance -->
+                <line x1="150" y1="120" x2="150" y2="80" class="arrow-slow" />
+                <line x1="150" y1="180" x2="150" y2="220" class="arrow-slow" />
+                
+                <!-- Fast (Horizontal) - Grows large distance -->
+                <line x1="180" y1="150" x2="260" y2="150" class="arrow-fast" />
+                <line x1="120" y1="150" x2="40" y2="150" class="arrow-fast" />
+
+                <!-- Labels -->
+                <text x="160" y="95" class="label-slow">遅い (青)</text>
+                <text x="190" y="140" class="label-fast">速い (赤)</text>
+
+                <!-- 3. Final Shape (Rectangle) -->
+                <!-- Horizontal faces moved far away, Vertical faces stayed close -->
+                <!-- The resulting crystal is wide but the dominant *surfaces* are the slow ones (top/bottom) -->
+                <rect x="50" y="80" width="200" height="140" class="convex-final" rx="5" />
+                
+                <text x="150" y="260" text-anchor="middle" font-size="14" fill="#2980b9" font-weight="bold">遅い面が形として残る</text>
+            </svg>
+
+            <div class="explanation">
+                <p>種結晶が外へ広がる場合：</p>
+                <ul>
+                    <li><span class="keyword-accent">速い面（赤）</span>：中心から遠くへ移動します（消滅するか、相対的に小さくなる）。</li>
+                    <li><span class="keyword">遅い面（青）</span>：中心の近くに留まり、最終的な輪郭（表面）の大部分を構成します。</li>
+                </ul>
+                <p><strong>結論：<span class="keyword">「遅い面」</span>が形を支配する。</strong></p>
+            </div>
+        </div>
+
+        <!-- 凹型成長 -->
+        <div class="comparison-box">
+            <span class="box-title">ケースB：凹型成長 (Concave)<br><small>（穴埋め・会合）</small></span>
+            
+            <svg class="svg-container" viewBox="0 0 300 300">
+                <!-- Background Material -->
+                <rect x="0" y="0" width="300" height="300" class="concave-bg" />
+
+                <!-- 1. Initial Hole (Dashed Circle/Shape) -->
+                <circle cx="150" cy="150" r="120" class="concave-hole-initial" />
+                <text x="150" y="45" fill="#666" font-size="12" text-anchor="middle">初期の穴 (空洞)</text>
+
+                <!-- 2. Growth Vectors (Inward) -->
+                <!-- Slow Face (Vertical) - Moves little inward -->
+                <line x1="150" y1="30" x2="150" y2="70" class="arrow-slow" />
+                <line x1="150" y1="270" x2="150" y2="230" class="arrow-slow" />
+
+                <!-- Fast Face (Horizontal) - Moves deep inward -->
+                <line x1="270" y1="150" x2="190" y2="150" class="arrow-fast" />
+                <line x1="30" y1="150" x2="110" y2="150" class="arrow-fast" />
+
+                <!-- Labels -->
+                <text x="160" y="65" class="label-slow">遅い (青)</text>
+                <text x="200" y="140" class="label-fast">速い (赤)</text>
+
+                <!-- 3. Final Hole Shape -->
+                <!-- The fast walls encroached deep into the hole -->
+                <!-- The slow walls are still far out -->
+                <!-- Resulting hole is bounded by the fast faces (Horizontal pinch) -->
+                
+                <!-- Drawing a shape that is pinched horizontally -->
+                <path d="M 110,70 L 190,70 L 190,230 L 110,230 Z" class="concave-hole-final" />
+                
+                <!-- Overlay arrows to show wall movement -->
+                <path d="M 30,150 L 110,150" stroke="rgba(231, 76, 60, 0.5)" stroke-width="20" />
+                <path d="M 270,150 L 190,150" stroke="rgba(231, 76, 60, 0.5)" stroke-width="20" />
+
+                <text x="150" y="260" text-anchor="middle" font-size="14" fill="#e74c3c" font-weight="bold">速い面が穴の壁になる</text>
+            </svg>
+
+            <div class="explanation">
+                <p>穴が内側へ埋まる場合：</p>
+                <ul>
+                    <li><span class="keyword">遅い面（青）</span>：あまり進まないため、壁としては奥まった位置に残ります。</li>
+                    <li><span class="keyword-accent">速い面（赤）</span>：猛スピードで穴の中心へせり出してきます。一番「出っ張った」壁が、穴の輪郭になります。</li>
+                </ul>
+                <p><strong>結論：<span class="keyword-accent">「速い面」</span>が形を支配する。</strong></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>論文の解釈（なぜ三角形の穴なのか？）</h2>
+        <p>
+            論文中の図3(b)で、AlNの穴が<strong>三角形</strong>になっていることが確認されました。<br>
+            この穴の壁面は <strong>{11-2x} ファセット</strong> です。
+        </p>
+        <div class="note-box">
+            <strong>ロジックの整理：</strong>
+            <ol>
+                <li>穴埋め成長（凹型）では、「成長速度が最も速い面」が穴の壁として現れる（ウルフの理論）。</li>
+                <li>実験の結果、穴の壁として {11-2x} 面が現れた。</li>
+                <li>したがって、この成長条件（1550℃ HVPE）では、<strong>{11-2x} 面が最も成長速度が速い面である</strong>と言える。</li>
+            </ol>
+        </div>
+        <p>
+            著者は、この理論を引用することで、「なぜこのような形状の穴が残ったのか」を理論的に裏付け、同時に「この条件では {11-2x} 方向への埋め込み成長が非常に活発である（からこそ平坦化が進む）」ことを示唆しています。
+        </p>
+    </div>
+
+</div>
+
+</body>
 </html>
