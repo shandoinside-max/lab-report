@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KOHエッチングによる極性判定の原理と操作</title>
+    <style>
+        :root {
+            --primary-color: #0056b3;
+            --secondary-color: #f0f8ff;
+            --accent-color: #d9534f;
+            --text-color: #333;
+            --border-color: #ddd;
+        }
+
+        body {
+            font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            border-radius: 8px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        h2 {
+            color: #444;
+            border-left: 5px solid var(--primary-color);
+            padding-left: 15px;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            background: var(--secondary-color);
+            padding-top: 5px;
+            padding-bottom: 5px;
+        }
+
+        h3 {
+            color: #555;
+            margin-top: 25px;
+            font-weight: bold;
+        }
+
+        .procedure-step {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            background: #fff;
+            border: 1px solid var(--border-color);
+            padding: 15px;
+            border-radius: 6px;
+        }
+
+        .step-number {
+            background: var(--primary-color);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .diagram-container {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            margin: 30px 0;
+            gap: 20px;
+        }
+
+        .polar-box {
+            flex: 1;
+            min-width: 300px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            background: #fff;
+            transition: transform 0.2s;
+        }
+
+        .polar-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .polar-title {
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .al-polar {
+            color: var(--primary-color);
+        }
+
+        .n-polar {
+            color: var(--accent-color);
+        }
+
+        .svg-diagram {
+            width: 100%;
+            height: 200px;
+            margin-bottom: 15px;
+        }
+
+        .result-description {
+            font-size: 0.9em;
+            text-align: left;
+            margin-top: 15px;
+            background: #f8f8f8;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .note {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        /* SVG Styles */
+        .atom {
+            stroke: #333;
+            stroke-width: 1;
+        }
+
+        .atom-al {
+            fill: #aaddff;
+        }
+
+        .atom-n {
+            fill: #ffcccc;
+        }
+
+        .bond {
+            stroke: #555;
+            stroke-width: 2;
+        }
+
+        .oh-ion {
+            fill: #ffd700;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .surface-line {
+            stroke: #333;
+            stroke-width: 2;
+        }
+
+        .pyramid {
+            fill: #e6e6e6;
+            stroke: #333;
+            stroke-width: 1;
+            stroke-dasharray: 2, 2;
+        }
+
+        .pyramid-solid {
+            fill: #d9534f;
+            stroke: #a00;
+            stroke-width: 1;
+            opacity: 0.2;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>KOHエッチングによる極性判定</h1>
+
+        <p>
+            窒化物半導体（AlN, GaN）において、結晶の極性（Al極性かN極性か）はデバイスの品質を左右する重要な要素です。
+            KOH（水酸化カリウム）水溶液に対する<strong>化学的安定性の違い</strong>を利用することで、簡便に極性を判定することができます。
+        </p>
+
+        <!-- 操作手順 -->
+        <h2>1. 実験操作 (Procedure)</h2>
+        <p>本論文で実施されている具体的な条件は以下の通りです。</p>
+
+        <div class="procedure-step">
+            <div class="step-number">1</div>
+            <div>
+                <strong>エッチング液の準備</strong><br>
+                KOH（水酸化カリウム）水溶液を準備します。<br>
+                <span class="note">濃度：8 mol/L（高濃度）</span>
+            </div>
+        </div>
+
+        <div class="procedure-step">
+            <div class="step-number">2</div>
+            <div>
+                <strong>加熱処理</strong><br>
+                溶液を加熱し、サンプルを浸漬します。<br>
+                <span class="note">条件：80℃ で 3分間</span>
+            </div>
+        </div>
+
+        <div class="procedure-step">
+            <div class="step-number">3</div>
+            <div>
+                <strong>表面観察</strong><br>
+                純水で洗浄後、SEM（走査型電子顕微鏡）やAFM、光学顕微鏡で表面形態を観察します。
+            </div>
+        </div>
+
+        <!-- 原理と判定 -->
+        <h2>2. 原理と判定基準 (Mechanism & Judgment)</h2>
+        <p>
+            水酸化物イオン（OH<sup>-</sup>）が結晶表面の原子を攻撃して溶解させようとします。<br>
+            表面原子の結合状態の違いにより、溶解速度に劇的な差が生まれます。
+        </p>
+
+        <div class="diagram-container">
+
+            <!-- Al極性 -->
+            <div class="polar-box">
+                <span class="polar-title al-polar">Al極性 (Al-polar)</span>
+                <span class="note">+c面 (0001)</span>
+
+                <!-- SVG Diagram for Al Polar -->
+                <svg class="svg-diagram" viewBox="0 0 200 150">
+                    <defs>
+                        <marker id="arrow" markerWidth="10" markerHeight="10" refX="0" refY="3" orient="auto"
+                            markerUnits="strokeWidth">
+                            <path d="M0,0 L0,6 L9,3 z" fill="#f00" />
+                        </marker>
+                    </defs>
+
+                    <!-- Background -->
+                    <rect x="0" y="0" width="200" height="150" fill="#f9faff" />
+
+                    <!-- Surface Line -->
+                    <line x1="20" y1="80" x2="180" y2="80" class="surface-line" />
+                    <text x="100" y="20" text-anchor="middle" font-size="12" fill="#0056b3">化学的に安定</text>
+
+                    <!-- Atoms (Schematic Wurtzite) -->
+                    <!-- Al atoms on top (Blue) -->
+                    <circle cx="50" cy="80" r="10" class="atom atom-al" />
+                    <circle cx="90" cy="80" r="10" class="atom atom-al" />
+                    <circle cx="130" cy="80" r="10" class="atom atom-al" />
+
+                    <!-- Bonds (3 legs down) -->
+                    <line x1="50" y1="80" x2="50" y2="110" class="bond" />
+                    <line x1="90" y1="80" x2="90" y2="110" class="bond" />
+                    <line x1="130" y1="80" x2="130" y2="110" class="bond" />
+
+                    <!-- N atoms below (Pink) -->
+                    <circle cx="50" cy="110" r="8" class="atom atom-n" />
+                    <circle cx="90" cy="110" r="8" class="atom atom-n" />
+                    <circle cx="130" cy="110" r="8" class="atom atom-n" />
+
+                    <!-- OH attack (Bounce back) -->
+                    <text x="40" y="50" class="oh-ion">OH⁻</text>
+                    <path d="M50,55 L50,65" stroke="#d9534f" stroke-width="2" marker-end="url(#arrow)" />
+                    <line x1="45" y1="70" x2="55" y2="60" stroke="#d9534f" stroke-width="2" /> <!-- X mark -->
+                    <line x1="45" y1="60" x2="55" y2="70" stroke="#d9534f" stroke-width="2" />
+
+                </svg>
+
+                <div class="result-description">
+                    <strong>【構造】</strong><br>
+                    表面のAl原子は、下層のN原子と強固に結合しています（3本の結合手が下向き）。OH<sup>-</sup>イオンが攻撃しにくい構造です。<br><br>
+                    <strong>【結果：変化なし】</strong><br>
+                    エッチングされにくく、<strong>表面は平坦（スムーズ）なまま</strong>維持されます。
+                </div>
+            </div>
+
+            <!-- N極性 -->
+            <div class="polar-box">
+                <span class="polar-title n-polar">N極性 (N-polar)</span>
+                <span class="note">-c面 (000-1)</span>
+
+                <!-- SVG Diagram for N Polar -->
+                <svg class="svg-diagram" viewBox="0 0 200 150">
+                    <!-- Background -->
+                    <rect x="0" y="0" width="200" height="150" fill="#fff5f5" />
+
+                    <!-- Etched Pyramids -->
+                    <polygon points="30,80 50,50 70,80" class="pyramid-solid" />
+                    <polygon points="70,80 100,40 130,80" class="pyramid-solid" />
+                    <polygon points="120,80 150,50 180,80" class="pyramid-solid" />
+
+                    <text x="100" y="20" text-anchor="middle" font-size="12" fill="#d9534f">溶解・ピラミッド形成</text>
+
+                    <!-- Surface Line (Broken) -->
+                    <line x1="20" y1="80" x2="180" y2="80" class="surface-line" stroke-dasharray="4" opacity="0.5" />
+
+                    <!-- Atoms (Schematic Wurtzite) -->
+                    <!-- N atoms on top (Pink) -->
+                    <circle cx="50" cy="80" r="10" class="atom atom-n" opacity="0.5" />
+                    <circle cx="100" cy="80" r="10" class="atom atom-n" opacity="0.5" />
+                    <circle cx="150" cy="80" r="10" class="atom atom-n" opacity="0.5" />
+
+                    <!-- Bonds (1 leg down - Weak against OH) -->
+                    <line x1="50" y1="80" x2="50" y2="110" class="bond" opacity="0.5" />
+                    <line x1="100" y1="80" x2="100" y2="110" class="bond" opacity="0.5" />
+                    <line x1="150" y1="80" x2="150" y2="110" class="bond" opacity="0.5" />
+
+                    <!-- OH attack (Success) -->
+                    <text x="90" y="30" class="oh-ion">OH⁻</text>
+                    <path d="M100,35 L100,65" stroke="#d9534f" stroke-width="2" marker-end="url(#arrow)" />
+
+                    <!-- Resulting Surface (Jagged) -->
+                    <polyline points="20,80 50,50 70,80 100,40 130,80 150,50 180,80" fill="none" stroke="#333"
+                        stroke-width="2" />
+
+                </svg>
+
+                <div class="result-description">
+                    <strong>【構造】</strong><br>
+                    表面のN原子は、OH<sup>-</sup>イオンと反応しやすく、酸化物として溶け出しやすい状態です。特定の面方位に沿って溶解が進みます。<br><br>
+                    <strong>【結果：六角錘ヒロック】</strong><br>
+                    激しくエッチングされ、表面に多数の<strong>六角錘状のピラミッド（ヒロック）</strong>が形成され、白濁して見えます。
+                </div>
+            </div>
+
+        </div>
+
+        <h2>3. 論文における結果</h2>
+        <p>
+            今回の論文では、KOHエッチングを行った結果、表面にピラミッドなどの荒れが観察されず、平坦性が保たれていました。<br>
+            このことから、成長したAlN層は化学的に安定な<strong>Al極性（+c面）</strong>であると結論付けられています。
+        </p>
+
+    </div>
+
+</body>
+
+</html>
