@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>平衡結晶形状理論と成長モードの温度依存性</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #34495e;
+            --accent: #3498db;
+            --highlight: #e74c3c;
+            --bg-color: #f8f9fa;
+        }
+
+        body {
+            font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", Meiryo, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            border-bottom: 3px solid var(--accent);
+            padding-bottom: 15px;
+            margin-bottom: 40px;
+        }
+
+        h2 {
+            color: var(--secondary);
+            border-left: 6px solid var(--accent);
+            padding-left: 15px;
+            margin-top: 50px;
+            background: #f1f8fc;
+            padding-top: 5px;
+            padding-bottom: 5px;
+        }
+
+        h3 {
+            color: var(--primary);
+            margin-top: 30px;
+        }
+
+        p {
+            margin-bottom: 20px;
+            font-size: 16px;
+        }
+
+        .concept-box {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+
+        .formula {
+            background-color: #f4f4f4;
+            padding: 15px;
+            border-radius: 4px;
+            text-align: center;
+            font-family: "Times New Roman", serif;
+            font-size: 1.2em;
+            margin: 20px 0;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 400px;
+            width: 100%;
+            margin: 30px 0;
+        }
+
+        .key-point {
+            font-weight: bold;
+            color: var(--highlight);
+        }
+
+        ul {
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        .flex-container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .flex-item {
+            flex: 1;
+            min-width: 300px;
+            background: #fcfcfc;
+            border: 1px solid #eee;
+            padding: 20px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>平衡結晶形状理論と成長モードの温度依存性</h1>
+        <p>
+            本資料では、論文（Thick AlN layers grown on µPSS...）の3.1章で論じられている結晶成長メカニズムについて、
+            以下の3つの視点から包括的に解説します。
+        </p>
+        <ul>
+            <li><strong>① 平衡結晶形状理論の基礎</strong>：結晶はなぜその形になるのか？</li>
+            <li><strong>② 1500℃での現象</strong>：なぜ斜めファセットが安定して現れるのか？</li>
+            <li><strong>③ 数値シミュレーション</strong>：塩素（Cl）原子の脱離と温度の関係</li>
+        </ul>
+
+        <!-- セクション1 -->
+        <h2>1. 平衡結晶形状理論 (Equilibrium Crystal Shape Theory)</h2>
+        <div class="concept-box">
+            <p>
+                物質は常に「エネルギーが低い（安定した）状態」になろうとします。<br>
+                結晶にとって「表面を作る」ことはエネルギー的なコストがかかる行為です。そのため、結晶は<strong>「トータルの表面エネルギーを最小にするような形」</strong>を選んで成長します。
+            </p>
+            <div class="formula">
+                &sum; &gamma;<sub>i</sub> A<sub>i</sub> = Minimum
+            </div>
+            <p style="text-align: center; font-size: 0.9em; color: #666;">
+                (&gamma;<sub>i</sub> : 面iの表面エネルギー密度, A<sub>i</sub> : 面iの面積)
+            </p>
+            <p>
+                つまり、<strong>表面エネルギー（&gamma;）が小さい面は広く残り</strong>、大きい面は消滅するか狭くなります。<br>
+                重要なのは、この<strong>&gamma;の値は「温度」や「雰囲気（吸着原子）」によって変化する</strong>という点です。
+            </p>
+        </div>
+
+        <!-- セクション2 -->
+        <h2>2. 1500℃で斜めファセットが最安定になる理由</h2>
+        <p>
+            通常、AlNなどの結晶では平坦な「c面」が最も安定ですが、1500℃という特定の条件下では、ギザギザした「斜めファセット」が現れます。これには2つの理由があります。
+        </p>
+
+        <div class="flex-container">
+            <div class="flex-item">
+                <h3>① 熱力学的理由（吸着安定化）</h3>
+                <p>
+                    斜めファセットは原子ステップ（段差）が多く、本来はエネルギーが高い面です。<br>
+                    しかし、低温域では雰囲気中の <strong>水素(H) や 塩素(Cl)</strong> がステップに強く吸着し、表面を保護（パッシベーション）します。
+                </p>
+                <p>
+                    これにより、斜め面の表面エネルギーが見かけ上低下し、<span class="key-point">「準安定な面」として存在が許される</span>ようになります。
+                </p>
+            </div>
+            <div class="flex-item">
+                <h3>② カイネティクス的理由（拡散限界）</h3>
+                <p>
+                    温度が低いと、表面に降り立ったAl原子が動き回るエネルギー（熱エネルギー）が不足します。
+                </p>
+                <p>
+                    原子は本来なら一番安定な「平坦部」まで移動したいのですが、途中の「斜め面の段差」に捕まり、そこから動けなくなります。<br>
+                    結果、<span class="key-point">局所的な安定状態（Local Minimum）</span>で妥協して成長が固定化されます。
+                </p>
+            </div>
+        </div>
+
+        <!-- セクション3 -->
+        <h2>3. 表面吸着原子（Cl）の脱離温度シミュレーション</h2>
+        <p>
+            では、何度になれば吸着原子（ここでは成長阻害要因となる塩素Clを想定）は表面からいなくなるのでしょうか？<br>
+            <strong>アレニウスの式</strong>を用いて、原子の「平均滞留時間 (&tau;)」を計算しました。
+        </p>
+
+        <div class="formula">
+            &tau; = &tau;<sub>0</sub> exp( E<sub>des</sub> / k<sub>B</sub>T )
+        </div>
+
+        <div class="chart-container">
+            <canvas id="desorptionChart"></canvas>
+        </div>
+
+        <div class="concept-box" style="background-color: #e8f4f8; border-color: #bde0ed;">
+            <h3>📊 グラフの読み解き：1550℃の境界線</h3>
+            <p>
+                グラフの赤い点線は、HVPE成長において<strong>「次の原子層が積み重なるまでの時間（約30ms）」</strong>の目安です。
+            </p>
+            <ul>
+                <li><strong>1450℃〜1500℃ (左側)</strong>：<br>
+                    滞留時間 &tau; が成長時間よりも長いため、Cl原子は表面に残り続け、斜めファセットを安定化（＝成長阻害）させます。
+                </li>
+                <li><strong>1550℃ (右側)</strong>：<br>
+                    滞留時間が急激に減少し、成長時間よりも短くなります（約11ms）。<br>
+                    Cl原子は次の層ができる前に脱離するため、表面は清浄化され、本来の最安定面である<strong>「c面」のみが現れるモード</strong>へと移行します。
+                </li>
+            </ul>
+            <p>
+                この計算結果は、論文中で「1550℃に上げると平坦化が進んだ」という実験事実を定量的に裏付けています。
+            </p>
+        </div>
+
+    </div>
+
+    <script>
+        // --- 物理パラメータ設定 ---
+        const k_B = 8.617333262e-5; // ボルツマン定数 [eV/K]
+        const tau_0 = 1.0e-13;      // 原子振動周期 [s]
+        const E_des = 4.0;          // 脱離エネルギー [eV] (Al-Cl結合を想定した強固な結合)
+        const growthTimeLimit = 30; // 1層成長時間の閾値 [ms] (30um/h仮定)
+
+        // --- データ生成 ---
+        const labels = [];
+        const dataTau = [];
+        const dataThreshold = [];
+
+        for (let tempC = 1400; tempC <= 1600; tempC += 10) {
+            const tempK = tempC + 273.15;
+            // アレニウス式: tau = tau0 * exp(E / kT)
+            const tau = tau_0 * Math.exp(E_des / (k_B * tempK));
+
+            labels.push(tempC);
+            dataTau.push(tau * 1000); // 秒 -> ミリ秒
+            dataThreshold.push(growthTimeLimit);
+        }
+
+        // --- Chart.js 描画設定 ---
+        const ctx = document.getElementById('desorptionChart').getContext('2d');
+        const myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: '塩素原子の滞留時間 τ (ms)',
+                        data: dataTau,
+                        borderColor: '#3498db',
+                        backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                        borderWidth: 3,
+                        pointRadius: 4,
+                        pointHoverRadius: 6,
+                        fill: true,
+                        tension: 0.3
+                    },
+                    {
+                        label: '成長による埋め込み時間 (閾値)',
+                        data: dataThreshold,
+                        borderColor: '#e74c3c',
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                        pointRadius: 0,
+                        fill: false
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: function (context) {
+                                return context.dataset.label + ': ' + context.parsed.y.toFixed(2) + ' ms';
+                            }
+                        }
+                    },
+                    legend: {
+                        position: 'top',
+                    }
+                },
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: '温度 (℃)',
+                            font: { size: 14 }
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: '滞留時間 (ms)',
+                            font: { size: 14 }
+                        },
+                        min: 0
+                    }
+                }
+            }
+        });
+    </script>
+
+</body>
+
+</html>
